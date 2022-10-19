@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Author;
 use App\Models\BookModel;
 use Illuminate\Http\Request;
+use App\Models\BookStatistic;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use App\Http\Controllers\BookController;
 
@@ -40,23 +43,29 @@ class BookController extends Controller
      */
     public function store(Request $request)
     {
+        $getId = $request->author_name;
+        $getId= explode("|",$getId) ;
 
         $validate = $request->validate([
-            'book_description'  => 'required|alpha',
-            'book_image'             => 'required',
-            'book_author'       => 'required|alpha'
+            'book_description'   => 'required',
+            'book_image'         => 'required',
+            'author_name'        => 'required'
         ]);
 
-        $addBook = BookModel::create($validate);  // need fillable
+        Author::where("author_name" , $request->author_name);
 
+        // $addBook = BookModel::create($validate);  // need fillable
+
+        $image = base64_encode(file_get_contents($request->file('book_image')));
 
         // $addBook = BookModel::create( $request->all());  // need fillable
 
-        // $addBook = BookModel::create([
-        //     'book_description'  => $request->input('book_description') ,
-        //     'book_image'        => $request->input('image'),
-        //     'book_author'       => $request->input('book_author')
-        // ]);
+        $addBook = BookModel::create([
+            'book_description'  => $request->input('book_description') ,
+            'book_image'        => $image,
+            'book_author'       => $getId[0],
+            'author_id'         => $getId[1],
+        ]);
 
 
 
@@ -81,9 +90,9 @@ class BookController extends Controller
      */
     public function show($id)
     {
-        $showData =  BookModel::where('id' , '=' , "$id")->get();
+        $showData =  BookModel::where('id' , "$id")->get();
 
-        return  view('edit' , ['showData' => $showData , 'id' => "$id"]);
+        return  view('edit' , ['showData' => $showData , 'id' => "$id" , 'authors' => Author::all() ]);
     }
 
 
@@ -141,11 +150,16 @@ class BookController extends Controller
         // $editBook->book_image =$request->image;
         // $editBook->book_author =$request->book_author ;
         // $editBook->save();
+        // dd($request);
+
+
+        $image = base64_encode(file_get_contents($request->file('book_image')));
+
         BookModel::where('id' ,'=',"$id")
         ->update([
             'book_description' => $request->book_description,
-            'book_image' => $request->image,
-            'book_author' => $request->book_author
+            'book_image' => $image,
+            'book_author' => $request->author_name
         ]);
 
         return redirect('/data');
@@ -192,4 +206,33 @@ class BookController extends Controller
             $sortData = BookModel::orderBy('updated_at', 'asc')->get();
         return view('view', ['arrayData' => $sortData]);
     }
+
+    public function addAuthor(Request $request)
+    {
+        $validate = $request->validate([
+        'author_name'            => 'required|alpha',
+        'author_email'           => 'required',
+        'nationality'            => 'required|alpha'
+        ]);
+
+
+        $addBook = Author::create($validate);
+        return redirect('/add');
+    }
+
+    public function author($id)
+    {
+        $user= Auth::user();
+        $books  =  BookModel::where('author_id', $id)->get();
+        dd($user->can('view', $books));
+
+        if ($user->can('view', $books )) {
+            echo "Current logged in user is allowed to update the Post: {$user->id}";
+          } else {
+            echo 'Not Authorized.';
+          }
+
+        return view('author' , ['author' => Author::find($id) , 'books' => BookModel::where('author_id', $id)->get()]);
+    }
+
 }

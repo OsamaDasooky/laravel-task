@@ -27,9 +27,17 @@
               <li class="nav-item">
                 <a class="nav-link active" aria-current="page" href="../home">home</a>
               </li>
+              @if(Auth::user())
+              {{-- @auth
+              @endauth --}}
               <li class="nav-item">
                 <a class="nav-link active" aria-current="page" href="../data">books</a>
               </li>
+
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="/signout">logout</a>
+              </li>
+              @endif
             </ul>
         </div>
 

@@ -1,15 +1,19 @@
 @extends('home')
-
 @section('pageContant')
-<form method="post" action="req">
+<form method="post" action="req" enctype="multipart/form-data"
+>
     @csrf
     <div class="mb-3">
       <label for="exampleInputEmail1" class="form-label">book author</label>
-      <input type="text" class="form-control" id="exampleInputEmail1" name="book_author" value="">
-    </div>
+        <select name="author_name" id="author"class="form-control">
+            @foreach ($authors as $author)
+            <option value="{{ $author['author_name'].'|'.$author['id'] }}">{{ $author['author_name'] }}</option>
+            @endforeach
+        </select>
+ </div>
     <div class="mb-3">
       <label for="exampleInputEmail1" class="form-label">book image</label>
-      <input type="text" class="form-control" id="exampleInputEmail1" name="book_image">
+      <input type="file" class="form-control" id="exampleInputEmail1" name="book_image">
     </div>
     <div class="mb-3">
       <label for="exampleInputPassword1" class="form-label">book description</label>

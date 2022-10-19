@@ -14,9 +14,12 @@ return new class extends Migration
     public function up()
     {
         Schema::create('book_models', function (Blueprint $table) {
-            $table->id()->autoIncrement();
+            $table->id();
+            // $table->unsignedBigInteger('author_id');
+            // $table->foreign('author_id')->references('id')->on('authors')->onDelete('cascade');
+            $table->foreignId('author_id')->constrained()->onDelete('cascade'); //
             $table->mediumText('book_description');
-            $table->mediumText('book_image');
+            $table->binary('book_image');
             $table->string('book_author');
             $table->softDeletes();
             $table->timestamps();

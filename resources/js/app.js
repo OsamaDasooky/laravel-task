@@ -1,1 +1,2 @@
-import './bootstrap';
+import "./bootstrap";
+// confirm("do you want to deleted?");
